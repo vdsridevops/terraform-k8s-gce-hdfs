@@ -1,0 +1,6 @@
+[k8smaster]
+k8s-master =10.138.0.15
+
+[k8sworkers]
+k8s-worker1 =10.138.0.16
+k8s-worker2 =10.138.0.17

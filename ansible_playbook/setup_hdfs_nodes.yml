@@ -1,0 +1,2 @@
+---
+- import_playbook: playbooks/configure_hdfs_nodes.yml

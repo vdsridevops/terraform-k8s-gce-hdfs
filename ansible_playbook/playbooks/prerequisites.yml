@@ -1,0 +1,93 @@
+--- 
+- 
+  hosts: all
+  gather_facts: False
+  tasks: 
+
+    - name: "Disabling Swap on all nodes and disable SElinux"
+      shell: |
+          swapoff -a
+          setenforce 0
+          sed -i 's/SELINUX=disabled/SELINUX=enabled/g' /etc/selinux/config
+
+    - name: "Commenting Swap entries in /etc/fstab"
+      replace: 
+        path: /etc/fstab
+        regexp: (.*swap*)
+        replace: "#\\1"
+
+    - name: "Disable firewalld"
+      service: 
+        name: firewalld
+        state: stopped
+
+    - name: Install http
+      yum:
+        name: httpd
+        state: present
+
+    - name: Enable service httpd
+      service:
+        name: httpd
+        enabled: yes
+
+    - name: Start service httpd, if not started
+      service:
+        name: httpd
+        state: started
+
+    - name: Creating a repository file for Kubernetes
+      file:
+        path: /etc/yum.repos.d/kubernetes.repo
+        state: touch
+
+    - name: Remove google-cloud.repo file
+      file:
+        path: /etc/yum.repos.d/google-cloud.repo
+        state: absent
+
+    - name: Creating a repository file for Kubernetes
+      file: 
+        path: /etc/yum.repos.d/google-cloud.repo
+        state: touch
+
+    - name: Adding repository details in Kubernetes repo file.
+      blockinfile:
+        path: /etc/yum.repos.d/kubernetes.repo
+        block: |
+          [kubernetes]
+          name=Kubernetes
+          baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+          enabled=1
+          gpgcheck=1
+          repo_gpgcheck=1
+          exclude=kube*
+          gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
+            https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+
+    - name: Adding repository details in google-cloud.repo repo file.
+      blockinfile:
+        path: /etc/yum.repos.d/google-cloud.repo
+        block: |
+          [google-compute-engine]
+          name=Google Compute Engine
+          baseurl=https://packages.cloud.google.com/yum/repos/google-compute-engine-el7-x86_64-stable
+          enabled=1
+          gpgcheck=1
+          repo_gpgcheck=1
+          exclude=kube*
+          gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
+            https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+          [google-cloud-sdk]
+          name=Google Cloud SDK
+          baseurl=https://packages.cloud.google.com/yum/repos/cloud-sdk-el7-x86_64
+          enabled=1
+          gpgcheck=1
+          repo_gpgcheck=1
+          exclude=kube*
+          gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
+            https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+
+  vars_files: 
+    - /test-terraform/terraform-k8s-gcp/ansible_playbook/group_vars/env_variables
+

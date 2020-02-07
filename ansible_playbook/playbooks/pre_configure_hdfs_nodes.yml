@@ -1,0 +1,61 @@
+--- 
+- 
+  hosts: k8smaster
+  gather_facts: False
+  tasks: 
+
+    - name: Copy Google cloud credential file to k8smater node
+      copy: 
+        src: "{{ service_account_file }}"
+        dest: /etc/credential.json
+
+    - name: Google auth login
+      shell: |
+        gcloud auth activate-service-account --key-file=/etc/credential.json
+
+
+#    - name: Download storage class configuration file from git repo
+#      get_url:
+#        url: https://raw.githubusercontent.com/vdsridevops/hdfs-kubernetes/master/storageclass.yaml
+#        dest: /tmp/storageclass.yaml
+
+    - name: Copy storage class file
+      copy:
+        src: "{{ storage_class_file }}"
+        dest: /tmp/storageclass.yaml
+
+    - name: Create storage class for Google cloud provider and create persistance disk on Google cloud
+      shell: |
+        kubectl apply -f /tmp/storageclass.yaml
+
+    - name: Download persistance volume configuration file from git repo
+      get_url:
+        url: https://raw.githubusercontent.com/vdsridevops/hdfs-kubernetes/master/pv.yaml
+        dest: /tmp/pv.yaml
+
+    - name: Create persistance volume for HDFS cluster
+      shell: |
+        kubectl apply -f /tmp/pv.yaml
+
+    - name: Create HDFS source directory
+      file:
+        path: /tmp/kubernetes-HDFS
+        state: directory
+
+    - name: Download Hadoop HDFS chart package files from git repo
+      git:
+        repo: https://github.com/apache-spark-on-k8s/kubernetes-HDFS.git
+        dest: /tmp/kubernetes-HDFS
+
+    - name: Remove input value file
+      file:
+        path: /tmp/kubernetes-HDFS/charts/hdfs-k8s/values.yaml
+        state: absent
+
+    - name: Download HDFS input file from git repo
+      get_url:
+        url: https://raw.githubusercontent.com/vdsridevops/hdfs-kubernetes/master/values.yaml
+        dest: /tmp/kubernetes-HDFS/charts/hdfs-k8s/values.yaml 
+
+  vars_files:
+    - /test-terraform/terraform-k8s-gcp/ansible_playbook/group_vars/env_variables

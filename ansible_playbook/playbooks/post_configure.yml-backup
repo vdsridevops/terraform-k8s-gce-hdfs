@@ -1,0 +1,42 @@
+--- 
+- 
+#  hosts: k8smaster
+  hosts: all  
+  gather_facts: False
+  tasks: 
+
+    - name: Remove kubelet file
+      file:
+        path: ["/etc/sysconfig/kubelet", "/etc/kubernetes/cloud-config"]
+        state: absent
+
+    - name: Creating kubelet file
+      file: 
+        path: ["/etc/sysconfig/kubelet", "/etc/kubernetes/cloud-config"]
+        state: touch
+
+    - name: Configure kubelet file
+      blockinfile:
+        path: /etc/sysconfig/kubelet
+        block: |
+          KUBELET_EXTRA_ARGS=--runtime-cgroups=/systemd/system.slice --kubelet-cgroups=/systemd/system.slice --cloud-provider=gce
+
+    - name: Configure cloud_config file
+      blockinfile:
+        path: /etc/kubernetes/cloud-config
+        block: |
+          [Global]
+          project-id = {{ projectid }}
+
+    - name: Configure 10-kubeadm.conf file
+      lineinfile:
+        dest: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+        regexp: '^Environment="KUBELET_KUBECONFIG_ARGS=--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf"'
+        line: 'Environment="KUBELET_KUBECONFIG_ARGS=--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf --cloud-provider=gce"'
+
+
+
+
+  vars_files: 
+    - /test-terraform/terraform-k8s-gcp/ansible_playbook/group_vars/env_variables
+

@@ -1,0 +1,18 @@
+--- 
+- 
+  hosts: k8smaster
+  gather_facts: False
+  tasks: 
+
+    - name: Install Hadoop HDFS
+      shell: |
+        cd /tmp/kubernetes-HDFS
+        sleep 20s
+        helm repo add incubator https://kubernetes-charts-incubator.storage.googleapis.com/ 
+        helm dependency build charts/hdfs-k8s
+        helm install -n my-hdfs charts/hdfs-k8s
+
+
+
+  vars_files:
+    - /test-terraform/terraform-k8s-gcp/ansible_playbook/group_vars/env_variables

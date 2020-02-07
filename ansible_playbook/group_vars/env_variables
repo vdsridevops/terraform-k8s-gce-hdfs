@@ -1,0 +1,26 @@
+#Enter the IP Address of the Kubernetes Master node to the ad_addr variable.
+ad_addr: 10.138.0.15
+cidr_v: 10.244.0.0/16
+path: /terraform/terraform-k8s-gce-hdfs/ansible_playbook
+projectid: devopsbar20
+cloudprovider: "    - --cloud-provider=gce"
+helmpath: ': ${HELM_INSTALL_DIR:="/usr/bin"}'
+
+service_account_file: /root/.ssh/credential.json
+storage_class_file: /terraform/terraform-k8s-gce-hdfs/ansible_playbook/storageclass.yaml
+
+auth_kind: serviceaccount
+scopes:
+- https://www.googleapis.com/auth/compute
+
+packages:
+- kubelet-1.11.3
+- kubeadm-1.11.3
+- kubectl-1.11.3
+- kubernetes-cni-0.6.0
+
+services:
+- docker
+- kubelet
+
+token_file: join_token

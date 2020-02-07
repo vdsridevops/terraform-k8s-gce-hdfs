@@ -1,0 +1,5 @@
+[k8smaster]
+${k8s-master-ip}
+
+[k8sworkers]
+${k8s-worker-ip}

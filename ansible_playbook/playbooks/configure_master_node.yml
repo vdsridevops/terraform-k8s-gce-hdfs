@@ -1,0 +1,53 @@
+---
+- hosts: k8smaster
+  gather_facts: False
+  vars_files:
+  - /test-terraform/terraform-k8s-gcp/ansible_playbook/group_vars/env_variables
+
+  tasks:
+  - name: Create kube-config file
+    file:
+      path: /tmp/kube-config.yaml
+      state: touch
+
+  - name: Adding details in kube-config file
+    blockinfile:
+      path: /tmp/kube-config.yaml
+      block: |
+          apiVersion: kubeadm.k8s.io/v1alpha1
+          kind:
+          kubernetesVersion: "v1.11.3"
+          networking:
+            podSubnet: {{cidr_v}}
+          apiServerExtraArgs:
+            service-node-port-range: 8000-31274
+
+  - name: Pulling images required for setting up a Kubernetes cluster
+    shell: kubeadm config images pull
+
+  - name: Resetting kubeadm
+    shell: kubeadm reset -f
+    register: output
+
+  - name: Initializing Kubernetes cluster
+    shell: kubeadm init --config /tmp/kube-config.yaml
+    register: output
+
+  - name: Storing Logs and Generated token for future purpose.
+    local_action: copy content={{ output.stdout }} dest={{ path }}/{{ token_file }}
+
+  - name: Create HOME/.kube folder
+    file:
+      path: $HOME/.kube
+      state: directory
+
+  - name: Copying required kubernetes files
+    shell: |
+     sudo cp -f /etc/kubernetes/admin.conf $HOME/.kube/config
+     sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+  - name: Install Network Add-on
+#    command: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/v0.9.1/Documentation/kube-flannel.yml
+    shell: |
+      kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/2140ac876ef134e0ed5af15c65e414cf26827915/Documentation/kube-flannel.yml
+      sleep 20s

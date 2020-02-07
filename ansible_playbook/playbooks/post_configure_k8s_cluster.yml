@@ -1,0 +1,109 @@
+--- 
+- 
+  hosts: all  
+  gather_facts: False
+  tasks: 
+
+    - name: Creating cloud-config file
+      file: 
+        path: /etc/kubernetes/cloud-config
+        state: touch
+
+    - name: Configure kubelet file
+      lineinfile:
+        dest: /etc/sysconfig/kubelet
+        regexp: '^KUBELET_EXTRA_ARGS='
+        line: 'KUBELET_EXTRA_ARGS=--runtime-cgroups=/systemd/system.slice --kubelet-cgroups=/systemd/system.slice --cloud-provider=gce'
+
+    - name: Configure cloud_config file
+      blockinfile:
+        path: /etc/kubernetes/cloud-config
+        block: |
+          [Global]
+          project-id = {{ projectid }}
+
+    - name: Configure 10-kubeadm.conf file
+      lineinfile:
+        dest: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+        regexp: '^Environment="KUBELET_KUBECONFIG_ARGS=--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf"'
+        line: 'Environment="KUBELET_KUBECONFIG_ARGS=--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf --cloud-provider=gce"'
+
+    - name: Reload daemon
+      shell: systemctl daemon-reload
+
+    - name: Restart kubelet service
+      service:
+        name: kubelet
+        state: restarted
+
+  vars_files: 
+    - /test-terraform/terraform-k8s-gcp/ansible_playbook/group_vars/env_variables
+
+# *********************************************************************************************************************
+
+- 
+  hosts: k8smaster
+  gather_facts: False
+  tasks:
+
+    - name: Configure cloud provider on kubeadm
+      blockinfile:
+        path: /etc/kubernetes/manifests/kube-controller-manager.yaml
+        insertafter: '    - --use-service-account-credentials=true'
+        block: |
+          {{ cloudprovider }}
+
+    - name: Reload daemon
+      shell: systemctl daemon-reload
+
+    - name: Restart kubelet service
+      service:
+        name: kubelet
+        state: restarted
+
+    - name: Install git
+      yum:
+        name: git
+        state: latest
+
+    - name: Download helm installation script
+      get_url: 
+        url: https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get 
+        dest: /tmp/install-helm.sh
+     
+    - name: Change helm script to execution mode
+      file:
+        path: /tmp/install-helm.sh
+        mode: u+x
+
+    - name: Configure helm installation script file
+      shell: sed -i s/"\/usr\/local\/bin"/"\/usr\/bin"/g /tmp/install-helm.sh
+
+    - name: Install helm package manager
+      command: /tmp/install-helm.sh
+      register: helm_result
+    
+    - name: Helm package manager installation result
+      debug: 
+        var: helm_result.stdout
+
+    - name: Download service account configuration file for helm/tiller
+      get_url: 
+        url: https://raw.githubusercontent.com/vdsridevops/hdfs-kubernetes/master/rbac-config.yaml 
+        dest: /tmp/rbac-config.yaml
+
+    - name: Create service account for helm/tiller
+      shell: |
+        kubectl apply -f /tmp/rbac-config.yaml
+        kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
+        sleep 10s
+        helm init --service-account tiller --upgrade
+        sleep 20s
+      register: rbac_config_result
+
+    - name: service account for helm/tiller result
+      debug:
+        var: rbac_config_result.stdout
+
+  vars_files:
+    - /test-terraform/terraform-k8s-gcp/ansible_playbook/group_vars/env_variables

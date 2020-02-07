@@ -1,0 +1,48 @@
+--- 
+- 
+  hosts: all
+  gather_facts: False
+
+  tasks: 
+
+    - name: "Install Docker"
+      shell: |
+        yum -y update
+        yum -y install yum-utils
+        yum-config-manager --add-repo https://yum.dockerproject.org/repo/main/centos/7
+        yum -y update
+        yum -y --nogpgcheck install docker-engine-1.12.6-1.el7.centos.x86_64
+
+    - name: "Install Kubernetes"
+      yum:
+        name: "{{ packages }}"
+        state: present
+        disable_excludes: kubernetes
+
+    - name: "Starting and Enabling the required services"
+      service: 
+        enabled: true
+        name: "{{ item }}"
+        state: started
+      with_items: "{{ services }}"
+
+    - name: "Creating a repository file for Kubernetes"
+      file: 
+        path: /etc/sysctl.d/k8s.conf
+        state: touch
+
+    - name: "Adding repository details in Kubernetes repo file."
+      blockinfile:
+        path: /etc/sysctl.d/k8s.conf
+        block: |
+            net.bridge.bridge-nf-call-ip6tables = 1
+            net.bridge.bridge-nf-call-iptables = 1
+
+    - name: "Load system services"
+      shell: sysctl --system
+
+    - name: "Enabling ip4 forwarding"
+      shell: "echo '1' > /proc/sys/net/ipv4/ip_forward"
+
+  vars_files: 
+    - /test-terraform/terraform-k8s-gcp/ansible_playbook/group_vars/env_variables

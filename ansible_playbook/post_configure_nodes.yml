@@ -1,0 +1,3 @@
+---
+- import_playbook: playbooks/post_configure_k8s_cluster.yml
+- import_playbook: playbooks/pre_configure_hdfs_nodes.yml
