@@ -7,6 +7,7 @@ provider "google" {
   region  = var.region
   zone    = var.zone
   version = "~> 3.7"
+  credentials = file("/root/.ssh/credential.json")
 }
 
 module "gce-k8s-master" {

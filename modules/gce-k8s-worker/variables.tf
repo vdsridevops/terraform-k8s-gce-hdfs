@@ -13,7 +13,7 @@ variable "region" {
 variable "machine_type" {
   description = " Machine type "
   type = string
-  default = "n1-standard-2"
+  default = "n1-highmem-2"
 }
 
 variable "zone" {

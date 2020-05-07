@@ -15,4 +15,4 @@
 
 
   vars_files:
-    - /test-terraform/terraform-k8s-gcp/ansible_playbook/group_vars/env_variables
+    - /terraform/terraform-k8s-gce-hdfs/ansible_playbook/group_vars/env_variables
