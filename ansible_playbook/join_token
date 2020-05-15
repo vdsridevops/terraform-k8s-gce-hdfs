@@ -31,13 +31,13 @@
 [etcd] Wrote Static Pod manifest for a local etcd instance to "/etc/kubernetes/manifests/etcd.yaml"
 [init] waiting for the kubelet to boot up the control plane as Static Pods from directory "/etc/kubernetes/manifests" 
 [init] this might take a minute or longer if the control plane images have to be pulled
-[apiclient] All control plane components are healthy after 41.002012 seconds
+[apiclient] All control plane components are healthy after 43.002254 seconds
 [uploadconfig] storing the configuration used in ConfigMap "kubeadm-config" in the "kube-system" Namespace
 [kubelet] Creating a ConfigMap "kubelet-config-1.11" in namespace kube-system with the configuration for the kubelets in the cluster
 [markmaster] Marking the node k8s-master as master by adding the label "node-role.kubernetes.io/master=''"
 [markmaster] Marking the node k8s-master as master by adding the taints [node-role.kubernetes.io/master:NoSchedule]
 [patchnode] Uploading the CRI Socket information "/var/run/dockershim.sock" to the Node API object "k8s-master" as an annotation
-[bootstraptoken] using token: r6y4z9.emq3dwnkil2mo2p0
+[bootstraptoken] using token: ffb2qr.t1av2yz429abaw8o
 [bootstraptoken] configured RBAC rules to allow Node Bootstrap tokens to post CSRs in order for nodes to get long term certificate credentials
 [bootstraptoken] configured RBAC rules to allow the csrapprover controller automatically approve CSRs from a Node Bootstrap Token
 [bootstraptoken] configured RBAC rules to allow certificate rotation for all node client certificates in the cluster
@@ -60,4 +60,4 @@ Run "kubectl apply -f [podnetwork].yaml" with one of the options listed at:
 You can now join any number of machines by running the following on each node
 as root:
 
-  kubeadm join 10.138.0.15:6443 --token r6y4z9.emq3dwnkil2mo2p0 --discovery-token-ca-cert-hash sha256:b860abb824d780294488c6742a1e93a554b9aa85cf5c20c890e1eb1ee3ae210b
+  kubeadm join 10.138.0.15:6443 --token ffb2qr.t1av2yz429abaw8o --discovery-token-ca-cert-hash sha256:b0974623dbfed464149048f201bd3e15fa86dee5acb0dc9c38b8d0e18c222adf

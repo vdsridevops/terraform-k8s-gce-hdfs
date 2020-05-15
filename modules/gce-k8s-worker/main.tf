@@ -1,8 +1,8 @@
 resource "google_compute_instance" "k8s_worker" {
-  count        = length(var.instance_name)
-  name         = var.instance_name[count.index]
+  count        = length(var.k8s_worker_instance_name)
+  name         = var.k8s_worker_instance_name[count.index]
   machine_type = var.machine_type
-  tags         = [var.instance_name[count.index]] 
+  tags         = [var.k8s_worker_instance_name[count.index]] 
   boot_disk {
     initialize_params {
       image = var.image
@@ -26,7 +26,7 @@ resource "google_compute_instance" "k8s_worker" {
   network_interface {
     network       = "default"
     subnetwork    = "default"
-    network_ip    = var.ip[count.index]
+    network_ip    = var.k8s_worker_private_ip[count.index]
     access_config {
     }
   }
@@ -44,8 +44,4 @@ resource "google_compute_firewall" "default" {
 
 }
 
-output "k8s_worker_ip_addr" {
-  value       = google_compute_instance.k8s_worker.*.network_interface.0.access_config.0.nat_ip
-  description = "The private IP address of the k8s-worker server instance"
-}
 

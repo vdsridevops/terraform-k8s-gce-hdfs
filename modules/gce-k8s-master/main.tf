@@ -1,7 +1,7 @@
 resource "google_compute_instance" "k8s_master" {
-  name         = var.instance_name
+  name         = var.k8s_master_instance_name
   machine_type = var.machine_type
-  tags         = [var.instance_name] 
+  tags         = [var.k8s_master_instance_name] 
   boot_disk {
     initialize_params {
       image = var.image
@@ -26,7 +26,7 @@ resource "google_compute_instance" "k8s_master" {
   network_interface {
     network       = "default"
     subnetwork    = "default"
-    network_ip    = var.ip
+    network_ip    = var.k8s_master_private_ip
     access_config {
     }
   }
@@ -43,9 +43,4 @@ resource "google_compute_firewall" "default" {
   }
   target_tags = ["master-http"]
 
-}
-
-output "k8s_master_ip_addr" {
-  value       = google_compute_instance.k8s_master.network_interface.0.access_config.0.nat_ip
-  description = "The private IP address of the k8s-master server instance"
 }

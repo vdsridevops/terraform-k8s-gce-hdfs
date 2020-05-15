@@ -1,0 +1,13 @@
+project                  = "devopsbar20"
+region                   = "us-west1"
+machine_type             = "n1-highmem-2"
+zone                     = "us-west1-a"
+image                    = "centos-7"
+ansible_path             = "/terraform/terraform-k8s-gce-hdfs/ansible_playbook"
+passwd                   = "ansible123"
+k8s_master_instance_name = "k8s-master"
+k8s_worker_instance_name = ["k8s-worker1", "k8s-worker2", "k8s-worker3"]
+k8s_master_private_ip    = "10.138.0.15"
+k8s_worker_private_ip    = ["10.138.0.16", "10.138.0.17", "10.138.0.18"]
+gce_ssh_user             = "root"
+gce_ssh_pub_key_file     = "/root/.ssh/id_rsa.pub"
