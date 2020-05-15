@@ -13,12 +13,6 @@
       shell: |
         gcloud auth activate-service-account --key-file=/etc/credential.json
 
-
-#    - name: Download storage class configuration file from git repo
-#      get_url:
-#        url: https://raw.githubusercontent.com/vdsridevops/hdfs-kubernetes/master/storageclass.yaml
-#        dest: /tmp/storageclass.yaml
-
     - name: Copy storage class file
       copy:
         src: "{{ storage_class_file }}"
@@ -28,9 +22,9 @@
       shell: |
         kubectl apply -f /tmp/storageclass.yaml
 
-    - name: Download persistance volume configuration file from git repo
-      get_url:
-        url: https://raw.githubusercontent.com/vdsridevops/hdfs-kubernetes/master/pv.yaml
+    - name: Copy persistance volume configuration file 
+      copy:
+        src: "{{ persistance_volume_file }}"
         dest: /tmp/pv.yaml
 
     - name: Create persistance volume for HDFS cluster

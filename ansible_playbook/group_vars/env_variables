@@ -8,6 +8,7 @@ helmpath: ': ${HELM_INSTALL_DIR:="/usr/bin"}'
 
 service_account_file: /root/.ssh/credential.json
 storage_class_file: /terraform/terraform-k8s-gce-hdfs/ansible_playbook/storageclass.yaml
+persistance_volume_file: /terraform/terraform-k8s-gce-hdfs/ansible_playbook/pv.yaml
 
 auth_kind: serviceaccount
 scopes:

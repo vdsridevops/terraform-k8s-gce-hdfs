@@ -15,4 +15,9 @@ variable "k8s_worker_instance_name" {
 variable "k8s_worker_private_ip" {
   type = list(string)
 }
-
+variable "disk_name" {
+  type = list(string)
+}
+variable "disk_size" {
+  type = list(string)
+}

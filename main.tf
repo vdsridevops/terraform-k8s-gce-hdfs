@@ -42,6 +42,10 @@ module "gce-k8s-worker" {
 
 module "gce-hdfs-disk" {
   source = "./modules/gce-hdfs-disk"
+  project = var.project
+  zone = var.zone
+  disk_name = var.disk_name
+  disk_size = var.disk_size
 }
 
 data "template_file" "ansible_hosts" {
@@ -74,17 +78,19 @@ sleep 30s
 $master
 $worker
 $postconfig
+$hdfsdeploy
 EOT
 
     environment = {
       master     = "ansible-playbook -i ${var.ansible_path}/hosts ${var.ansible_path}/setup_master_node.yml"
       worker     = "ansible-playbook -i ${var.ansible_path}/hosts ${var.ansible_path}/setup_worker_nodes.yml"
       postconfig = "ansible-playbook -i ${var.ansible_path}/hosts ${var.ansible_path}/post_configure_nodes.yml"
+      hdfsdeploy = "ansible-playbook -i ${var.ansible_path}/hosts ${var.ansible_path}/setup_hdfs_nodes.yml"
     }
   }
 }
 
-
+/*
 
 resource "null_resource" "ansible-play-post" {
   depends_on = [null_resource.ansible-play]
@@ -102,3 +108,4 @@ EOT
   }
 }
 
+*/

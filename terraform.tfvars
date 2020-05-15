@@ -11,3 +11,5 @@ k8s_master_private_ip    = "10.138.0.15"
 k8s_worker_private_ip    = ["10.138.0.16", "10.138.0.17", "10.138.0.18"]
 gce_ssh_user             = "root"
 gce_ssh_pub_key_file     = "/root/.ssh/id_rsa.pub"
+disk_name                = ["zookeeper-0", "zookeeper-1", "zookeeper-2", "hdfs-journalnode-k8s-0", "hdfs-journalnode-k8s-1", "hdfs-journalnode-k8s-2", "hdfs-namenode-k8s-0", "hdfs-namenode-k8s-1", "opentsdb-claim0"]
+disk_size                = ["5", "5", "5", "20", "20", "20", "100", "100", "20"]
